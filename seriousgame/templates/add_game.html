@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter un jeu</title>
+</head>
+<body>
+    <h1>Ajouter un nouveau jeu</h1>
+    <form action="/add_game" method="POST" enctype="multipart/form-data">
+        <label for="name">Nom du jeu:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea name="description" required></textarea><br><br>
+
+        <label for="guide">Guide du jeu:</label>
+        <input type="file" name="guide" required><br><br>
+
+        <label for="affiche">Affiche du jeu:</label>
+        <input type="file" name="affiche" required><br><br>
+
+        <button type="submit">Ajouter</button>
+    </form>
+</body>
+</html>

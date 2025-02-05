@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des jeux</title>
+</head>
+<body>
+    <h1>Liste des jeux</h1>
+    <a href="/">Retour à l'accueil</a>
+    <ul>
+        {% for game in games %}
+        <li>
+            <h2>{{ game.name }}</h2>
+            <p>Description : {{ game.description }}</p>
+            {% if game.scoring %}
+            <p>Scoring :</p>
+            <ul>
+                <li>Fond : {{ game.scoring.fond }}</li>
+                <li>Originalité : {{ game.scoring.originalite }}</li>
+                <li>Cohésion : {{ game.scoring.cohesion }}</li>
+                <li>Esthétique : {{ game.scoring.esthetique }}</li>
+                <li>Fun : {{ game.scoring.fun }}</li>
+            </ul>
+            {% else %}
+            <p>Scoring non défini.</p>
+            <a href="/add_scoring/{{ game._id }}">Ajouter un scoring</a>
+            {% endif %}
+            <p><a href="{{ game.guide }}">Télécharger le guide</a></p>
+            <img src="{{ game.affiche }}" alt="Affiche" width="200">
+            <a href="/delete_game/{{ game._id }}">Supprimer</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

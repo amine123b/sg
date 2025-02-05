@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter/Modifier le scoring</title>
+</head>
+<body>
+    <h1>Scoring pour {{ game.name }}</h1>
+    <form action="" method="POST">
+        <h3>Critères de scoring (1 à 5) :</h3>
+        <label for="fond">Fond :</label>
+        <input type="number" name="fond" min="1" max="5" required><br>
+        <label for="originalite">Originalité :</label>
+        <input type="number" name="originalite" min="1" max="5" required><br>
+        <label for="cohesion">Cohésion :</label>
+        <input type="number" name="cohesion" min="1" max="5" required><br>
+        <label for="esthetique">Esthétique :</label>
+        <input type="number" name="esthetique" min="1" max="5" required><br>
+        <label for="fun">Fun :</label>
+        <input type="number" name="fun" min="1" max="5" required><br><br>
+
+        <button type="submit">Enregistrer</button>
+    </form>
+</body>
+</html>
