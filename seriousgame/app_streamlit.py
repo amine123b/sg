@@ -21,19 +21,18 @@ try:
     # Ping the MongoDB server to check the connection
     client.admin.command('ping')  # Ping command to check if connection is established
     print("Successfully connected to MongoDB Atlas!")
-
-    # Access the database and collection
-    db = client["games_database"]  # Specify the database name
-    collection = db["games"]  # Specify the collection name
-
-    # Test: Print collection data (optional)
-    print(f"Connected to database: {db.name}")
-    print(f"Connected to collection: {collection.name}")
-    
 except ConnectionError as e:
     print("Failed to connect to MongoDB Atlas:", e)
-except Exception as e:
-    print("An error occurred:", e)
+
+    # Access the database and collection
+db = client["games_database"]  # Specify the database name
+collection = db["games"]  # Specify the collection name
+    # Test: Print collection data (optional)
+print(f"Connected to database: {db.name}")
+print(f"Connected to collection: {collection.name}")
+    
+# except Exception as e:
+#     print("An error occurred:", e)
 
 # Upload Folders
 UPLOAD_FOLDER_GUIDES = os.getenv("UPLOAD_FOLDER_GUIDES")
