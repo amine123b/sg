@@ -56,8 +56,7 @@ st.title("SeriousGame édition 2025")
 st.markdown(
     """
     ### 🎲 Workshop SERIOUS GAME RSE – Explorez la RSE par le jeu !
-    Plongez dans une **expérience ludique et interactive** pour découvrir les enjeux de la **Responsabilité Sociétale des Entreprises (RSE)**.  
-    
+    Plongez dans une **expérience ludique et interactive** pour découvrir les enjeux de la **Responsabilité Sociétale des Entreprises (RSE)**.
     À travers des jeux dynamiques, explorez des thématiques clés :  
     **Les parties prenantes, les Objectifs de Développement Durable (ODD), le Reporting ESG, les Achats Responsables (ISO 20400),  
     l'Économie Circulaire, l’Efficacité Énergétique, l’Action Climat en entreprise, et bien plus encore.**  
