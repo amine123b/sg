@@ -15,8 +15,7 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 
 # Connect to MongoDB Atlas using the URI
-collection = []
-db = []
+
 try:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     
@@ -32,10 +31,6 @@ try:
     print(f"Connected to database: {db.name}")
     print(f"Connected to collection: {collection.name}")
     
-except ConnectionError as e:
-    print("Failed to connect to MongoDB Atlas:", e)
-except Exception as e:
-    print("An error occurred:", e)
 
 # Upload Folders
 UPLOAD_FOLDER_GUIDES = os.getenv("UPLOAD_FOLDER_GUIDES")
@@ -299,4 +294,8 @@ elif option == "Empreinte Carbone":
         st.table(df_carbone)
     else:
         st.write("⚠️ Aucun jeu n'a encore une empreinte carbone enregistrée.")
+except ConnectionError as e:
+    print("Failed to connect to MongoDB Atlas:", e)
+except Exception as e:
+    print("An error occurred:", e)
 
