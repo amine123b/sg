@@ -35,29 +35,21 @@ except Exception as e:
 db = client["games_database"]  # Explicitly specify the database name
 collection = db["games"]
 
+
 # Upload Folders
-UPLOAD_FOLDER_GUIDES = os.getenv("UPLOAD_FOLDER_GUIDES")
-UPLOAD_FOLDER_IMAGES = os.getenv("UPLOAD_FOLDER_IMAGES")
+UPLOAD_FOLDER_GUIDES = "uploads/guides"
+UPLOAD_FOLDER_IMAGES = "uploads/images"
 
-
-# Admin Credentials
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
-
-# Function to check admin login
-def check_login(username, password):
-    print(f"Debug: username={username}, password={password}")
-    print(f"Debug: ADMIN_USERNAME={ADMIN_USERNAME}, ADMIN_PASSWORD={ADMIN_PASSWORD}")
-    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+# Create upload folders if they don't exist
+os.makedirs(UPLOAD_FOLDER_GUIDES, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_IMAGES, exist_ok=True)
 
 # Page principale
 st.title("SeriousGame édition 2025")
-# 📝 Ajout de la description sous le titre
 st.markdown(
     """
     ### 🎲 Workshop SERIOUS GAME RSE – Explorez la RSE par le jeu !
-    Plongez dans une **expérience ludique et interactive** pour découvrir les enjeux de la **Responsabilité Sociétale des Entreprises (RSE)**.  
-    
+    Plongez dans une **expérience ludique et interactive** pour découvrir les enjeux de la **Responsabilité Sociétale des Entreprises (RSE)**.
     À travers des jeux dynamiques, explorez des thématiques clés :  
     **Les parties prenantes, les Objectifs de Développement Durable (ODD), le Reporting ESG, les Achats Responsables (ISO 20400),  
     l'Économie Circulaire, l’Efficacité Énergétique, l’Action Climat en entreprise, et bien plus encore.**  
@@ -66,6 +58,8 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Sidebar Menu
 st.sidebar.title("Menu")
 option = st.sidebar.selectbox(
     "Choisissez une option :",
@@ -86,47 +80,33 @@ if option == "Accueil":
                 st.write(f"**Description**: {game['description']}")
                 st.write(f"📄 [Télécharger le guide]({game['guide']})")
 
-# 🔐 **PAGE D'AJOUT DE JEU AVEC LOGIN ADMIN**
+# 🆕 **PAGE D'AJOUT DE JEU (NO LOGIN REQUIRED)**
 elif option == "Ajouter un jeu":
-    st.header("🔒 Connexion Administrateur")
+    st.header("🆕 Ajouter un nouveau jeu")
 
-    if "admin_logged_in" not in st.session_state:
-        st.session_state.admin_logged_in = False
-
-    if not st.session_state.admin_logged_in:
-        with st.form("login_form"):
-            username = st.text_input("Nom d'utilisateur")
-            password = st.text_input("Mot de passe", type="password")
-            login_button = st.form_submit_button("Se connecter")
-
-        if login_button:
-            if check_login(username, password):
-                st.session_state.admin_logged_in = True
-                st.success("✅ Connexion réussie !")
-            else:
-                st.error("❌ Identifiants incorrects. Réessayez.")
-    else:
-        st.success("✅ Vous êtes connecté en tant qu'administrateur.")
-
-        # Ajout d'un jeu
-        st.subheader("🆕 Ajouter un nouveau jeu")
+    # Form to add a new game
+    with st.form("add_game_form"):
         name = st.text_input("Nom du jeu", placeholder="Entrez le nom du jeu")
         description = st.text_area("Description", placeholder="Décrivez le jeu")
         guide = st.file_uploader("Guide du jeu (PDF)", type=["pdf"])
         affiche = st.file_uploader("Affiche du jeu (JPG/PNG)", type=["jpg", "png"])
+        submit_button = st.form_submit_button("Ajouter le jeu")
 
-        if st.button("Ajouter le jeu"):
-            if name and description and guide and affiche:
-                # Sauvegarde des fichiers
-                guide_path = os.path.join(UPLOAD_FOLDER_GUIDES, guide.name)
+    if submit_button:
+        if name and description and guide and affiche:
+            try:
+                # Save uploaded files with unique names
+                guide_filename = f"{uuid.uuid4()}_{guide.name}"
+                guide_path = os.path.join(UPLOAD_FOLDER_GUIDES, guide_filename)
                 with open(guide_path, "wb") as f:
                     f.write(guide.getbuffer())
 
-                affiche_path = os.path.join(UPLOAD_FOLDER_IMAGES, affiche.name)
+                affiche_filename = f"{uuid.uuid4()}_{affiche.name}"
+                affiche_path = os.path.join(UPLOAD_FOLDER_IMAGES, affiche_filename)
                 with open(affiche_path, "wb") as f:
                     f.write(affiche.getbuffer())
 
-                # Enregistrement dans MongoDB
+                # Insert game data into MongoDB
                 collection.insert_one({
                     "name": name,
                     "description": description,
@@ -136,25 +116,10 @@ elif option == "Ajouter un jeu":
                     "carbone": None
                 })
                 st.success(f"✅ Jeu '{name}' ajouté avec succès !")
-            else:
-                st.error("❌ Veuillez remplir tous les champs.")
-
-        st.markdown("---")
-
-        # Suppression d'un jeu
-        st.subheader("🗑️ Supprimer un jeu")
-        games = list(collection.find({}))
-        if games:
-            game_names = {game["name"]: game["_id"] for game in games}
-            selected_game = st.selectbox("Sélectionnez un jeu à supprimer :", list(game_names.keys()))
-
-            if st.button("Supprimer le jeu", key="delete_game"):
-                collection.delete_one({"_id": ObjectId(game_names[selected_game])})
-                st.success(f"🚮 Jeu '{selected_game}' supprimé avec succès !")
-
-        # Bouton de déconnexion
-        if st.button("🔓 Se déconnecter"):
-            st.session_state.admin_logged_in = False
+            except Exception as e:
+                st.error(f"❌ Une erreur s'est produite : {e}")
+        else:
+            st.error("❌ Veuillez remplir tous les champs.")
 
 # 🏆 **PAGE SCORING**
 elif option == "Scoring":
@@ -167,7 +132,7 @@ elif option == "Scoring":
         selected_game = st.selectbox("Sélectionnez un jeu :", [game["name"] for game in games])
         game = next(game for game in games if game["name"] == selected_game)
 
-        st.image(game["affiche"], caption="Affiche du jeu", use_container_width =True)
+        st.image(game["affiche"], caption="Affiche du jeu", use_container_width=True)
 
         # Critères de scoring
         fond = st.slider("Fond", min_value=1, max_value=5, step=1)
@@ -184,7 +149,7 @@ elif option == "Scoring":
                 "esthetique": esthetique,
                 "fun": fun
             }
-            collection.update_one({"_id": ObjectId(game["_id"])}, {"$push": {"scoring": scoring}})
+            collection.update_one({"_id": game["_id"]}, {"$push": {"scoring": scoring}})
             st.success("✅ Scoring enregistré avec succès !")
 
 # 🔥 **PAGE LEADERBOARD**
@@ -214,8 +179,7 @@ elif option == "Leaderboard":
         st.plotly_chart(px.bar(df, x="Nom du jeu", y="Score moyen", title="Classement des jeux"))
         st.table(df)
 
-
-    # 🌱 **PAGE EMPREINTE CARBONE**
+# 🌱 **PAGE EMPREINTE CARBONE**
 elif option == "Empreinte Carbone":
     st.header("♻️ Calcul de l'empreinte carbone")
     games = list(collection.find({}))
@@ -227,75 +191,28 @@ elif option == "Empreinte Carbone":
         game = next(game for game in games if game["name"] == selected_game)
 
         st.image(game["affiche"], caption="Affiche du jeu", use_container_width=True)
+
         # Entrée de données pour empreinte carbone
         energie = st.number_input("Consommation d'énergie (kWh)", min_value=0.0, step=0.1, key="energie")
         materiaux = st.number_input("Poids des matériaux utilisés (kg)", min_value=0.0, step=0.1, key="materiaux")
         transport = st.number_input("Distance de transport (km)", min_value=0.0, step=1.0, key="transport")
         joueurs = st.number_input("Nombre de joueurs", min_value=1, step=1, key="joueurs")
 
-
-
-        # 
         if st.button("Calculer l'empreinte carbone"):
             # Calcul de l'empreinte carbone totale
             carbone_total = (energie * 0.233) + (materiaux * 2.5) + (transport * 0.1)
-            
+
             # Calcul de l'empreinte carbone par joueur
             carbone_par_joueur = carbone_total / joueurs if joueurs > 0 else carbone_total
-            
+
             # Mise à jour de la base de données
             collection.update_one(
-                {"_id": ObjectId(game["_id"])}, 
+                {"_id": game["_id"]},
                 {"$set": {
-                "carbone": str(carbone_total), 
-                "joueurs": str(joueurs), 
-                "carbone_par_joueur": str(carbone_par_joueur)
-                }})
-            # ✅ Message de confirmation
+                    "carbone": str(carbone_total),
+                    "joueurs": str(joueurs),
+                    "carbone_par_joueur": str(carbone_par_joueur)
+                }}
+            )
             st.success(f"✅ Empreinte carbone totale : {carbone_total:.2f} kgCO₂")
             st.success(f"👤 Empreinte carbone par joueur : {carbone_par_joueur:.2f} kgCO₂/joueur")
-            
-    # 📊 **Classement des jeux par empreinte carbone**
-    st.subheader("📉 Classement des jeux selon leur empreinte carbone")
-
-    carbon_data = []
-    for g in games:
-        if "carbone" in g and g["carbone"] is not None:  # Vérifier si la valeur existe
-            carbon_data.append({
-                "Nom du jeu": g.get("name", "Inconnu"),
-                "Empreinte Carbone (kgCO₂)": g.get("carbone", 0),
-                "Empreinte Carbone par Joueur (kgCO₂)": g.get("carbone_par_joueur", 0)
-            })
-
-    if len(carbon_data) > 0:
-        df_carbone = pd.DataFrame(carbon_data)
-
-        # 📊 Classement par empreinte carbone totale
-        df_total = df_carbone.sort_values("Empreinte Carbone (kgCO₂)", ascending=True).reset_index(drop=True)
-        fig_total = px.bar(
-            df_total, 
-            x="Nom du jeu", 
-            y="Empreinte Carbone (kgCO₂)", 
-            title="Classement des jeux par empreinte carbone totale", 
-            text="Empreinte Carbone (kgCO₂)"
-        )
-        fig_total.update_traces(textposition="outside")
-        st.plotly_chart(fig_total, use_container_width=True)
-
-        # 📊 Classement par empreinte carbone par joueur
-        df_joueur = df_carbone.sort_values("Empreinte Carbone par Joueur (kgCO₂)", ascending=True).reset_index(drop=True)
-        fig_joueur = px.bar(
-            df_joueur, 
-            x="Nom du jeu", 
-            y="Empreinte Carbone par Joueur (kgCO₂)", 
-            title="Classement des jeux par empreinte carbone par joueur", 
-            text="Empreinte Carbone par Joueur (kgCO₂)"
-        )
-        fig_joueur.update_traces(textposition="outside")
-        st.plotly_chart(fig_joueur, use_container_width=True)
-
-        # 📋 Tableau des classements
-        st.table(df_carbone)
-    else:
-        st.write("⚠️ Aucun jeu n'a encore une empreinte carbone enregistrée.")
-
