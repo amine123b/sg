@@ -1,6 +1,5 @@
-streamlit
-pymongo
-pandas
-plotly
-bson
-dotenv
+streamlit==1.23.1
+pymongo==4.11
+pandas==2.2.2
+plotly==5.15
+python-dotenv==1.0.0
