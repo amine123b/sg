@@ -12,19 +12,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MongoDB Connection
-MONGO_URI = os.getenv("MONGO_URI")
-client = MongoClient(MONGO_URI)
+MONGO_URI = os.getenv("URI")
+client = MongoClient(URI)
 db = client["games_database"]  # Explicitly specify the database name
 collection = db["games"]
 
 # Upload Folders
-UPLOAD_FOLDER_GUIDES = os.getenv("UPLOAD_FOLDER_GUIDES")
-UPLOAD_FOLDER_IMAGES = os.getenv("UPLOAD_FOLDER_IMAGES")
+UPLOAD_FOLDER_GUIDES = os.getenv("FOLDER_GUIDES")
+UPLOAD_FOLDER_IMAGES = os.getenv("FOLDER_IMAGES")
 
 
 # Admin Credentials
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_USERNAME = os.getenv("USERNAME")
+ADMIN_PASSWORD = os.getenv("PASSWORD")
 
 # Function to check admin login
 def check_login(username, password):
